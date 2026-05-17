@@ -7,6 +7,16 @@ import { Watchlist, type WatchlistEntry } from "@/components/Watchlist";
 import { ThesisLibrary } from "@/components/ThesisLibrary";
 import { ToolBadge } from "@/components/ToolBadge";
 import { QuoteWall } from "@/components/QuoteWall";
+import { TickerTape } from "@/components/TickerTape";
+
+const LEFT_TICKERS = [
+  "NVDA", "AAPL", "MSFT", "GOOGL", "META",
+  "AMZN", "TSLA", "AVGO", "AMD", "ORCL",
+];
+const RIGHT_TICKERS = [
+  "PLTR", "COIN", "TSM", "ASML", "ANET",
+  "NFLX", "MU", "SMCI", "ARM", "CRWV",
+];
 
 const SAMPLE_PROMPTS = [
   "What's today's most under-priced AI infrastructure name?",
@@ -78,6 +88,8 @@ export default function Home() {
 
   return (
     <div className="grid-bg min-h-screen">
+      <TickerTape side="left" symbols={LEFT_TICKERS} durationSec={80} />
+      <TickerTape side="right" symbols={RIGHT_TICKERS} durationSec={80} />
       <header className="border-b border-white/10 bg-black/40 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
