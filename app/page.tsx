@@ -150,7 +150,7 @@ export default function Home() {
                 e.preventDefault();
                 submit(input);
               }}
-              className="flex items-end gap-2"
+              className="flex items-center gap-2"
             >
               <textarea
                 value={input}
