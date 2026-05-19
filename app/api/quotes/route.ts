@@ -8,21 +8,46 @@ export type TickerQuote = {
   changePct: number;
 };
 
+type YahooChartResponse = {
+  chart?: {
+    result?: Array<{
+      meta?: {
+        regularMarketPrice?: number;
+        chartPreviousClose?: number;
+        previousClose?: number;
+      };
+    }> | null;
+  };
+};
+
 async function fetchOne(symbol: string): Promise<TickerQuote | null> {
   try {
     const r = await fetch(
-      `https://stooq.com/q/l/?s=${symbol.toLowerCase()}.us&f=sd2t2cp&h&e=csv`,
-      { next: { revalidate: 30 } },
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`,
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          Accept: "application/json,text/plain,*/*",
+        },
+        next: { revalidate: 30 },
+      },
     );
     if (!r.ok) return null;
-    const text = await r.text();
-    const lines = text.trim().split("\n");
-    if (lines.length < 2) return null;
-    const cols = lines[1].split(",");
-    // cols: Symbol, Date, Time, Close, Prev
-    const close = Number(cols[3]);
-    const prev = Number(cols[4]);
-    if (!isFinite(close) || !isFinite(prev) || prev === 0) return null;
+    const json = (await r.json()) as YahooChartResponse;
+    const meta = json.chart?.result?.[0]?.meta;
+    if (!meta) return null;
+    const close = meta.regularMarketPrice;
+    const prev = meta.chartPreviousClose ?? meta.previousClose;
+    if (
+      typeof close !== "number" ||
+      typeof prev !== "number" ||
+      !isFinite(close) ||
+      !isFinite(prev) ||
+      prev === 0
+    ) {
+      return null;
+    }
     const changePct = ((close - prev) / prev) * 100;
     return {
       symbol: symbol.toUpperCase(),
