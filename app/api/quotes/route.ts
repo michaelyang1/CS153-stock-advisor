@@ -12,9 +12,13 @@ const BROWSER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
 async function fetchBatch(symbols: string[]): Promise<TickerQuote[]> {
-  const list = symbols.map((s) => `${s.toLowerCase()}.us`).join("+");
+  // Stooq batches symbols with a literal `+` separator; do NOT URL-encode the
+  // separator or stooq treats it as one big symbol and returns N/D rows.
+  const list = symbols
+    .map((s) => `${encodeURIComponent(s.toLowerCase())}.us`)
+    .join("+");
   const r = await fetch(
-    `https://stooq.com/q/l/?s=${encodeURIComponent(list)}&f=sd2t2cp&h&e=csv`,
+    `https://stooq.com/q/l/?s=${list}&f=sd2t2cp&h&e=csv`,
     {
       headers: { "User-Agent": BROWSER_UA, Accept: "text/csv,*/*" },
       next: { revalidate: 30 },
