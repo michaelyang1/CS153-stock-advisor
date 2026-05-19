@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { snapshotFor } from "@/lib/tickerSnapshot";
 
 type TickerQuote = {
   symbol: string;
@@ -16,7 +17,10 @@ type Props = {
 };
 
 export function TickerTape({ side, symbols, durationSec = 70 }: Props) {
-  const [quotes, setQuotes] = useState<TickerQuote[]>([]);
+  // Seed with the baked snapshot so the tape always has something to render,
+  // even before the first /api/quotes response lands or if it fails entirely.
+  const seed = useMemo(() => snapshotFor(symbols), [symbols]);
+  const [quotes, setQuotes] = useState<TickerQuote[]>(seed);
 
   useEffect(() => {
     let cancelled = false;
@@ -28,9 +32,9 @@ export function TickerTape({ side, symbols, durationSec = 70 }: Props) {
         );
         if (!r.ok) return;
         const json = (await r.json()) as { quotes: TickerQuote[] };
-        if (!cancelled) setQuotes(json.quotes);
+        if (!cancelled && json.quotes.length > 0) setQuotes(json.quotes);
       } catch {
-        /* swallow */
+        /* swallow — keep last known good (seed or previous fetch) */
       }
     };
     load();

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { SNAPSHOT } from "./snapshot";
+import { SNAPSHOT } from "@/lib/tickerSnapshot";
 
 export const revalidate = 30;
 

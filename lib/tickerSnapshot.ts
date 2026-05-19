@@ -1,13 +1,19 @@
-// Build-time snapshot used when the live Stooq fetch fails (Stooq intermittently
-// rate-limits Vercel datacenter IPs). Values were captured from Stooq on the
-// last successful snapshot date below and rounded to two decimals; they are
-// only shown as a fallback so the ticker tape never goes empty.
+// Build-time snapshot of ticker quotes. Shared between the /api/quotes route
+// (last-resort fallback when Stooq rate-limits Vercel's datacenter IPs) and
+// the client TickerTape component (so the tapes always have something to
+// render even before the first /api/quotes response lands or if the request
+// fails). Values captured from Stooq on SNAPSHOT_DATE and rounded to two
+// decimals — they are decorative fallback only.
 
-import type { TickerQuote } from "./route";
+export type TickerSnapshotQuote = {
+  symbol: string;
+  price: number;
+  changePct: number;
+};
 
 export const SNAPSHOT_DATE = "2026-05-18";
 
-export const SNAPSHOT: Record<string, TickerQuote> = {
+export const SNAPSHOT: Record<string, TickerSnapshotQuote> = {
   NVDA: { symbol: "NVDA", price: 222.32, changePct: -1.33 },
   AAPL: { symbol: "AAPL", price: 297.84, changePct: -0.8 },
   MSFT: { symbol: "MSFT", price: 423.54, changePct: 0.38 },
@@ -29,3 +35,12 @@ export const SNAPSHOT: Record<string, TickerQuote> = {
   ARM: { symbol: "ARM", price: 215.12, changePct: 2.85 },
   CRWV: { symbol: "CRWV", price: 103.77, changePct: -3.29 },
 };
+
+export function snapshotFor(symbols: string[]): TickerSnapshotQuote[] {
+  const out: TickerSnapshotQuote[] = [];
+  for (const s of symbols) {
+    const q = SNAPSHOT[s.toUpperCase()];
+    if (q) out.push(q);
+  }
+  return out;
+}
