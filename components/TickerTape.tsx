@@ -47,9 +47,12 @@ export function TickerTape({ side, symbols, durationSec = 70 }: Props) {
 
   return (
     <aside
-      className={`pointer-events-none fixed top-16 bottom-0 hidden w-[88px] 2xl:block ${
-        side === "left" ? "left-0" : "right-0"
-      }`}
+      className="pointer-events-none fixed top-16 bottom-0 hidden w-[88px] lg:block"
+      style={
+        side === "left"
+          ? { left: "max(0px, calc(50vw - 640px - 96px))" }
+          : { right: "max(0px, calc(50vw - 640px - 96px))" }
+      }
       aria-hidden="true"
     >
       <div className="tape-fade absolute inset-0 overflow-hidden">
