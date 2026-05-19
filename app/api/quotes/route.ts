@@ -8,55 +8,41 @@ export type TickerQuote = {
   changePct: number;
 };
 
-type YahooChartResponse = {
-  chart?: {
-    result?: Array<{
-      meta?: {
-        regularMarketPrice?: number;
-        chartPreviousClose?: number;
-        previousClose?: number;
-      };
-    }> | null;
-  };
-};
+const BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-async function fetchOne(symbol: string): Promise<TickerQuote | null> {
-  try {
-    const r = await fetch(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`,
-      {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-          Accept: "application/json,text/plain,*/*",
-        },
-        next: { revalidate: 30 },
-      },
-    );
-    if (!r.ok) return null;
-    const json = (await r.json()) as YahooChartResponse;
-    const meta = json.chart?.result?.[0]?.meta;
-    if (!meta) return null;
-    const close = meta.regularMarketPrice;
-    const prev = meta.chartPreviousClose ?? meta.previousClose;
-    if (
-      typeof close !== "number" ||
-      typeof prev !== "number" ||
-      !isFinite(close) ||
-      !isFinite(prev) ||
-      prev === 0
-    ) {
-      return null;
-    }
+async function fetchBatch(symbols: string[]): Promise<TickerQuote[]> {
+  const list = symbols.map((s) => `${s.toLowerCase()}.us`).join("+");
+  const r = await fetch(
+    `https://stooq.com/q/l/?s=${encodeURIComponent(list)}&f=sd2t2cp&h&e=csv`,
+    {
+      headers: { "User-Agent": BROWSER_UA, Accept: "text/csv,*/*" },
+      next: { revalidate: 30 },
+    },
+  );
+  if (!r.ok) return [];
+  const text = await r.text();
+  const lines = text.trim().split("\n");
+  if (lines.length < 2) return [];
+
+  const out: TickerQuote[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(",");
+    // cols: Symbol, Date, Time, Close, Prev
+    const rawSymbol = cols[0]?.trim();
+    if (!rawSymbol) continue;
+    const symbol = rawSymbol.replace(/\.US$/i, "").toUpperCase();
+    const close = Number(cols[3]);
+    const prev = Number(cols[4]);
+    if (!isFinite(close) || !isFinite(prev) || prev === 0) continue;
     const changePct = ((close - prev) / prev) * 100;
-    return {
-      symbol: symbol.toUpperCase(),
+    out.push({
+      symbol,
       price: Number(close.toFixed(2)),
       changePct: Number(changePct.toFixed(2)),
-    };
-  } catch {
-    return null;
+    });
   }
+  return out;
 }
 
 export async function GET(req: Request) {
@@ -72,15 +58,18 @@ export async function GET(req: Request) {
     return NextResponse.json({ quotes: [] });
   }
 
-  const settled = await Promise.all(symbols.map(fetchOne));
-  const quotes = settled.filter((q): q is TickerQuote => q !== null);
+  let quotes: TickerQuote[] = [];
+  try {
+    quotes = await fetchBatch(symbols);
+  } catch {
+    quotes = [];
+  }
 
   return NextResponse.json(
     { quotes, fetchedAt: new Date().toISOString() },
     {
       headers: {
-        "Cache-Control":
-          "public, s-maxage=30, stale-while-revalidate=60",
+        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
       },
     },
   );
