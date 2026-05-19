@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { SNAPSHOT } from "./snapshot";
 
 export const revalidate = 30;
 
@@ -10,6 +11,10 @@ export type TickerQuote = {
 
 const BROWSER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+
+// In-memory last-good per symbol. Survives warm function invocations and lets
+// us serve real data even when Stooq rate-limits a follow-up revalidation.
+const lastGood = new Map<string, TickerQuote>();
 
 async function fetchBatch(symbols: string[]): Promise<TickerQuote[]> {
   // Stooq batches symbols with a literal `+` separator; do NOT URL-encode the
@@ -62,15 +67,41 @@ export async function GET(req: Request) {
     return NextResponse.json({ quotes: [] });
   }
 
-  let quotes: TickerQuote[] = [];
+  let live: TickerQuote[] = [];
   try {
-    quotes = await fetchBatch(symbols);
+    live = await fetchBatch(symbols);
   } catch {
-    quotes = [];
+    live = [];
   }
 
+  // Update last-good with anything fresh.
+  for (const q of live) lastGood.set(q.symbol, q);
+
+  // Compose response symbol-by-symbol so a partial Stooq failure still produces
+  // a populated tape: prefer live → last-good → baked snapshot.
+  const quotes: TickerQuote[] = [];
+  let source: "live" | "mixed" | "snapshot" = "live";
+  let liveCount = 0;
+  for (const s of symbols) {
+    const fromLive = live.find((q) => q.symbol === s);
+    if (fromLive) {
+      quotes.push(fromLive);
+      liveCount++;
+      continue;
+    }
+    const cached = lastGood.get(s);
+    if (cached) {
+      quotes.push(cached);
+      continue;
+    }
+    const snap = SNAPSHOT[s];
+    if (snap) quotes.push(snap);
+  }
+  if (liveCount === 0) source = "snapshot";
+  else if (liveCount < symbols.length) source = "mixed";
+
   return NextResponse.json(
-    { quotes, fetchedAt: new Date().toISOString() },
+    { quotes, fetchedAt: new Date().toISOString(), source },
     {
       headers: {
         "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
