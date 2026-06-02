@@ -119,7 +119,7 @@ export default function Home() {
           <ThesisLibrary onPick={submit} />
         </aside>
 
-        <section className="flex flex-col rounded-lg border border-white/10 bg-neutral-900/40 backdrop-blur">
+        <section className="flex flex-col self-start rounded-lg border border-white/10 bg-neutral-900/40 backdrop-blur lg:sticky lg:top-6">
           <div
             ref={scrollRef}
             className="flex-1 space-y-5 overflow-y-auto p-5"
@@ -205,7 +205,7 @@ function Greeting({ onPick }: { onPick: (q: string) => void }) {
         Briefing
       </div>
       <h2 className="mt-1 text-xl font-semibold text-neutral-50">
-        I&apos;m Atlas. I hunt the next Nvidia &apos;22.
+        I&apos;m Atlas. I hunt the next 10x–100x breakout.
       </h2>
       <p className="mt-2 max-w-prose text-sm leading-relaxed text-neutral-300">
         Composite voice of Brad Gerstner, Ron Baron, Peter Thiel, Bill Miller,
