@@ -86,6 +86,27 @@ export default function Home() {
 
   const busy = status === "streaming" || status === "submitted";
 
+  // Familiar typing indicator: show it only while we're genuinely waiting for
+  // Atlas to start writing prose. Once text streams in (or a tool badge is
+  // actively running), that UI conveys the activity instead — so the dots
+  // don't double up with visible output, the way ChatGPT/Claude/Gemini behave.
+  const lastMessage = messages[messages.length - 1];
+  const lastAssistantParts =
+    lastMessage?.role === "assistant"
+      ? (lastMessage.parts as PartLike[])
+      : null;
+  const assistantHasText =
+    lastAssistantParts?.some(
+      (p) => p.type === "text" && (p.text ?? "").trim().length > 0,
+    ) ?? false;
+  const toolRunning =
+    lastAssistantParts?.some(
+      (p) =>
+        p.type.startsWith("tool-") &&
+        (p.state === "input-streaming" || p.state === "input-available"),
+    ) ?? false;
+  const showTyping = busy && !assistantHasText && !toolRunning;
+
   return (
     <div className="grid-bg min-h-screen">
       <TickerTape side="left" symbols={LEFT_TICKERS} durationSec={80} />
@@ -127,15 +148,20 @@ export default function Home() {
           >
             {messages.length === 0 && <Greeting onPick={submit} />}
 
-            {messages.map((m) => (
-              <MessageBubble key={m.id} role={m.role} parts={m.parts as PartLike[]} />
+            {messages.map((m, idx) => (
+              <MessageBubble
+                key={m.id}
+                role={m.role}
+                parts={m.parts as PartLike[]}
+                streaming={
+                  status === "streaming" &&
+                  idx === messages.length - 1 &&
+                  m.role === "assistant"
+                }
+              />
             ))}
 
-            {busy && (
-              <div className="flex items-center gap-2 text-xs text-neutral-500">
-                <span className="ticker-pulse">●</span> Atlas is thinking…
-              </div>
-            )}
+            {showTyping && <TypingIndicator />}
 
             {error && (
               <div className="rounded-md border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-200">
@@ -167,6 +193,7 @@ export default function Home() {
               />
               <button
                 type="submit"
+                aria-label="Send message"
                 disabled={busy || input.trim().length === 0}
                 className="rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-neutral-700 disabled:text-neutral-500"
               >
@@ -266,14 +293,41 @@ function Greeting({ onPick }: { onPick: (q: string) => void }) {
   );
 }
 
+function TypingIndicator() {
+  return (
+    <div className="flex justify-start">
+      <div className="rounded-lg border border-white/10 bg-black/40 px-4 py-3">
+        <div className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.22em] text-amber-300/80">
+          Atlas Frontier
+        </div>
+        <div
+          role="status"
+          aria-label="Atlas is thinking"
+          className="flex items-center gap-1.5"
+        >
+          <span className="typing-dot" />
+          <span className="typing-dot" />
+          <span className="typing-dot" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MessageBubble({
   role,
   parts,
+  streaming = false,
 }: {
   role: "user" | "assistant" | "system";
   parts: PartLike[];
+  streaming?: boolean;
 }) {
   const isUser = role === "user";
+  let lastTextIdx = -1;
+  parts.forEach((p, i) => {
+    if (p.type === "text") lastTextIdx = i;
+  });
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
@@ -294,6 +348,9 @@ function MessageBubble({
               return (
                 <p key={i} className="whitespace-pre-wrap">
                   {p.text}
+                  {streaming && i === lastTextIdx && (
+                    <span className="stream-caret" aria-hidden="true" />
+                  )}
                 </p>
               );
             }

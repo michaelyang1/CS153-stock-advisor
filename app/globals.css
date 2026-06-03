@@ -37,6 +37,43 @@ body {
   50% { opacity: 1; }
 }
 
+/* Chat "typing" indicator — three staggered dots, like a familiar chat client. */
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--accent);
+  animation: typing-bounce 1.25s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.16s; }
+.typing-dot:nth-child(3) { animation-delay: 0.32s; }
+@keyframes typing-bounce {
+  0%, 75%, 100% { transform: translateY(0); opacity: 0.3; }
+  35% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Blinking caret on the assistant message that is actively streaming. */
+.stream-caret {
+  display: inline-block;
+  width: 7px;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--accent);
+  border-radius: 1px;
+  animation: caret-blink 1.05s steps(2, start) infinite;
+}
+@keyframes caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-dot,
+  .stream-caret,
+  .ticker-pulse { animation: none; }
+}
+
 @keyframes tape-scroll {
   0% { transform: translateY(0); }
   100% { transform: translateY(-50%); }
