@@ -194,6 +194,44 @@ export default function Home() {
           <QuoteWall />
         </aside>
       </main>
+
+      <footer className="mx-auto max-w-7xl px-4 pb-10">
+        <div className="relative overflow-hidden rounded-lg border border-rose-500/25 bg-gradient-to-br from-rose-500/[0.07] via-neutral-900/40 to-amber-500/[0.05] p-5 backdrop-blur">
+          <div
+            className="pointer-events-none absolute inset-y-0 left-0 w-1.5"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(45deg, rgba(244,63,94,0.55) 0 6px, transparent 6px 12px)",
+            }}
+          />
+          <div className="flex items-start gap-3 pl-2">
+            <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-rose-500 to-amber-400 font-mono text-sm font-black text-black">
+              !
+            </div>
+            <div>
+              <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-300/90">
+                Risk Disclosure · Not Financial Advice
+              </div>
+              <p className="max-w-3xl text-xs leading-relaxed text-neutral-400">
+                Atlas runs a deliberately{" "}
+                <span className="font-medium text-neutral-200">
+                  ultra-aggressive, growth-at-all-costs
+                </span>{" "}
+                strategy — every idea is engineered for asymmetric{" "}
+                <span className="font-medium text-amber-200/90">10x–100x</span>{" "}
+                upside, never for safety. That ambition carries{" "}
+                <span className="font-medium text-neutral-200">
+                  extreme volatility and a high probability of deep drawdowns
+                </span>
+                ; you can lose a large portion of your invested capital. Nothing
+                Atlas outputs is financial, investment, or tax advice. If your
+                goal is capital preservation, this is the wrong terminal — own a
+                diversified, low-cost index ETF and hold.
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
