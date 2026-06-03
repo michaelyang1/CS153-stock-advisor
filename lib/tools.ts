@@ -217,7 +217,7 @@ export const scoreThesis = tool({
 
 export const addToWatchlist = tool({
   description:
-    "Add a name to the user's frontier watchlist. Use this whenever conviction is HIGH_CONVICTION or WATCHLIST. The UI persists these client-side.",
+    "Add a name to the user's frontier watchlist. Use this whenever conviction is HIGH_CONVICTION or WATCHLIST. The UI shows these in the Frontier Watchlist for the current session.",
   inputSchema: z.object({
     asset: z.string().describe("Company name + ticker, e.g. 'NVIDIA (NVDA)'."),
     band: z.enum(["HIGH_CONVICTION", "WATCHLIST"]),
