@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Tests run under Vitest (esbuild transpile, no tsc) and use test globals;
+    // keep them out of the Next/TS lint pass so `next build` stays green.
+    "__tests__/**",
+    "vitest.config.mts",
+    "vitest.setup.ts",
   ]),
 ]);
 
