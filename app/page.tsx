@@ -35,7 +35,8 @@ type PartLike = {
 };
 
 export default function Home() {
-  const { messages, sendMessage, status, error } = useChat();
+  const { messages, sendMessage, status, error, setMessages, clearError } =
+    useChat();
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -108,6 +109,15 @@ export default function Home() {
     ) ?? false;
   const showTyping = busy && !assistantHasText && !toolRunning;
 
+  // Reset the conversation in place — no page refresh. Clearing messages also
+  // empties the derived scorecard/watchlist, and clearError dismisses any
+  // stream error banner.
+  const clearChat = () => {
+    if (busy) return;
+    setMessages([]);
+    clearError();
+  };
+
   return (
     <div className="grid-bg min-h-screen">
       <TickerTape side="left" symbols={LEFT_TICKERS} durationSec={80} />
@@ -142,6 +152,20 @@ export default function Home() {
         </aside>
 
         <section className="flex flex-col self-start rounded-lg border border-white/10 bg-neutral-900/40 backdrop-blur lg:sticky lg:top-6">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-600">
+              Terminal Session
+            </span>
+            {messages.length > 0 && (
+              <button
+                onClick={clearChat}
+                disabled={busy}
+                className="text-[10px] uppercase tracking-wider text-neutral-500 transition hover:text-neutral-200 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Clear chat
+              </button>
+            )}
+          </div>
           <div
             ref={scrollRef}
             className="flex-1 space-y-5 overflow-y-auto p-5"
@@ -216,10 +240,7 @@ export default function Home() {
             </div>
           )}
           <ScoringRubric />
-          <Watchlist
-            entries={watchlistEntries}
-            onClear={() => window.location.reload()}
-          />
+          <Watchlist entries={watchlistEntries} onClear={clearChat} />
           <QuoteWall />
         </aside>
       </main>

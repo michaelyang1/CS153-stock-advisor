@@ -14,6 +14,8 @@ const chatState = vi.hoisted(() => ({
   status: "ready" as "submitted" | "streaming" | "ready" | "error",
   error: undefined as undefined | { message: string },
   sendMessage: vi.fn(),
+  setMessages: vi.fn(),
+  clearError: vi.fn(),
 }));
 
 vi.mock("@ai-sdk/react", () => ({
@@ -33,6 +35,8 @@ beforeEach(() => {
   chatState.status = "ready";
   chatState.error = undefined;
   chatState.sendMessage = vi.fn();
+  chatState.setMessages = vi.fn();
+  chatState.clearError = vi.fn();
 });
 
 describe("chat — typing / thinking indicator", () => {
