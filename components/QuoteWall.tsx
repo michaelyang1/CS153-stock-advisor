@@ -13,7 +13,7 @@ export function QuoteWall() {
           {INVESTOR_QUOTES.length} entries
         </div>
       </div>
-      <ul className="max-h-72 space-y-3 overflow-y-auto pr-1">
+      <ul className="max-h-80 space-y-3 overflow-y-auto pr-1">
         {INVESTOR_QUOTES.map((q, i) => (
           <li
             key={i}

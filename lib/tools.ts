@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { RUBRIC_AXES, CONVICTION_BANDS } from "@/lib/rubric";
 
 const YF_HEADERS = {
   "User-Agent":
@@ -156,16 +157,6 @@ export const searchNews = tool({
   },
 });
 
-const RUBRIC_AXES = [
-  { key: "founder", label: "Founder & Team", weight: 0.20 },
-  { key: "market", label: "Market Size & S-curve", weight: 0.20 },
-  { key: "moat", label: "Moat / Monopoly Power", weight: 0.15 },
-  { key: "unitEconomics", label: "Unit Economics", weight: 0.15 },
-  { key: "narrative", label: "Narrative Velocity", weight: 0.10 },
-  { key: "asymmetry", label: "Asymmetric Payoff", weight: 0.10 },
-  { key: "timing", label: "Timing Catalyst", weight: 0.10 },
-] as const;
-
 export const scoreThesis = tool({
   description:
     "Score an investment thesis on the 7-axis frontier rubric. Returns the weighted total and a conviction band. The UI renders this as a scorecard, so call this whenever you've formed a view on a name.",
@@ -194,9 +185,9 @@ export const scoreThesis = tool({
     );
     const weighted = Number(total.toFixed(2));
     const band =
-      weighted >= 7.5
+      weighted >= CONVICTION_BANDS.HIGH_CONVICTION
         ? "HIGH_CONVICTION"
-        : weighted >= 6.0
+        : weighted >= CONVICTION_BANDS.WATCHLIST
           ? "WATCHLIST"
           : "PASS";
     return {

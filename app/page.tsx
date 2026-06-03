@@ -7,6 +7,7 @@ import { Watchlist, type WatchlistEntry } from "@/components/Watchlist";
 import { ThesisLibrary } from "@/components/ThesisLibrary";
 import { ToolBadge } from "@/components/ToolBadge";
 import { QuoteWall } from "@/components/QuoteWall";
+import { ScoringRubric } from "@/components/ScoringRubric";
 import { TickerTape } from "@/components/TickerTape";
 
 const LEFT_TICKERS = [
@@ -214,6 +215,7 @@ export default function Home() {
               Once Atlas scores a name, the rubric breakdown shows here.
             </div>
           )}
+          <ScoringRubric />
           <Watchlist
             entries={watchlistEntries}
             onClear={() => window.location.reload()}
