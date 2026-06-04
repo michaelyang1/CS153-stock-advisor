@@ -2,6 +2,8 @@
 
 import { useChat } from "@ai-sdk/react";
 import { useMemo, useRef, useState, useEffect } from "react";
+import { Streamdown } from "streamdown";
+import "streamdown/styles.css";
 import { Scorecard, type ScorecardData } from "@/components/Scorecard";
 import { Watchlist, type WatchlistEntry } from "@/components/Watchlist";
 import { ThesisLibrary } from "@/components/ThesisLibrary";
@@ -368,13 +370,27 @@ function MessageBubble({
         <div className="space-y-2">
           {parts.map((p, i) => {
             if (p.type === "text") {
+              // User input is shown literally (typing "**" should not bold).
+              // Assistant prose renders as GitHub-flavored markdown via
+              // Streamdown, which tolerates the incomplete blocks that occur
+              // mid-stream — so Atlas's signature verdict/table formats
+              // display as intended instead of as raw asterisks.
+              if (isUser) {
+                return (
+                  <p key={i} className="whitespace-pre-wrap">
+                    {p.text}
+                  </p>
+                );
+              }
               return (
-                <p key={i} className="whitespace-pre-wrap">
-                  {p.text}
+                <div key={i}>
+                  <Streamdown className="chat-md" controls={false}>
+                    {p.text ?? ""}
+                  </Streamdown>
                   {streaming && i === lastTextIdx && (
                     <span className="stream-caret" aria-hidden="true" />
                   )}
-                </p>
+                </div>
               );
             }
             if (p.type.startsWith("tool-")) {

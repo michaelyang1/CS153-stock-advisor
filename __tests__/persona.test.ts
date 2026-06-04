@@ -37,6 +37,51 @@ describe("lib/persona — system prompt contract", () => {
   });
 });
 
+describe("lib/persona — response format contract (signature formats per question type)", () => {
+  it("declares all five question-type formats", () => {
+    expect(PERSONA_SYSTEM_PROMPT).toContain("RESPONSE FORMATS");
+    for (const format of [
+      "VERDICT",
+      "HEAD-TO-HEAD",
+      "FRONTIER SCAN",
+      "MACRO READ",
+      "QUICK TAKE",
+    ]) {
+      expect(PERSONA_SYSTEM_PROMPT).toContain(format);
+    }
+  });
+
+  it("tells the model the chat renders GitHub-flavored markdown (tables included)", () => {
+    expect(PERSONA_SYSTEM_PROMPT).toContain(
+      "GitHub-flavored markdown (tables included)",
+    );
+  });
+
+  it("defines the VERDICT signature sections", () => {
+    for (const section of [
+      "**The Call**",
+      "**Why**",
+      "**The Analog**",
+      "**Catalyst Watch**",
+      "**Kill Switch**",
+    ]) {
+      expect(PERSONA_SYSTEM_PROMPT).toContain(section);
+    }
+  });
+
+  it("defines the closers for comparison, scan, and macro formats", () => {
+    expect(PERSONA_SYSTEM_PROMPT).toContain("**The Winner**");
+    expect(PERSONA_SYSTEM_PROMPT).toContain("**Deepest Edge**");
+    expect(PERSONA_SYSTEM_PROMPT).toContain("**Bottom Line**");
+    expect(PERSONA_SYSTEM_PROMPT).toContain("**How to Play It**");
+  });
+
+  it("enforces one format per reply and a word budget", () => {
+    expect(PERSONA_SYSTEM_PROMPT).toContain("exactly ONE format per reply");
+    expect(PERSONA_SYSTEM_PROMPT).toContain("~300 words");
+  });
+});
+
 describe("lib/persona — scope guard (on-topic enforcement)", () => {
   it("declares a non-negotiable on-mission scope section", () => {
     expect(PERSONA_SYSTEM_PROMPT).toContain("SCOPE — STAY ON MISSION");

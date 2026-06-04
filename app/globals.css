@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Let Tailwind see the utility classes Streamdown's components use. */
+@source "../node_modules/streamdown/dist/*.js";
 
 :root {
   --background: #0a0a0a;
@@ -6,6 +8,19 @@
   --accent: #f59e0b;
   --accent-soft: #f59e0b1a;
   --grid-line: #ffffff08;
+
+  /* Design tokens Streamdown's components read (shadcn naming), mapped to
+     the terminal palette so markdown chrome matches the rest of the UI. */
+  --card: #171717;
+  --card-foreground: #fafafa;
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+  --border: #ffffff1a;
+  --input: #ffffff1a;
+  --primary: #f59e0b;
+  --primary-foreground: #000000;
+  --sidebar: #141414; /* table-wrapper background in Streamdown */
+  --radius: 0.5rem;
 }
 
 @theme inline {
@@ -50,6 +65,94 @@ body {
 @keyframes typing-bounce {
   0%, 75%, 100% { transform: translateY(0); opacity: 0.3; }
   35% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Markdown inside assistant chat bubbles — Atlas's signature formats.
+   Element selectors out-rank Streamdown's single utility classes, so these
+   give the rendered markdown its terminal character. */
+.chat-md {
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+.chat-md h1,
+.chat-md h2,
+.chat-md h3,
+.chat-md h4 {
+  margin: 0.875rem 0 0.375rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #fcd34d; /* amber-300 — the verdict header is the signature */
+}
+.chat-md > *:first-child {
+  margin-top: 0;
+}
+.chat-md p {
+  margin: 0.375rem 0;
+}
+/* Streamdown renders **bold** as a span tagged data-streamdown="strong". */
+.chat-md strong,
+.chat-md [data-streamdown="strong"] {
+  color: #fafafa;
+}
+.chat-md ul,
+.chat-md ol {
+  margin: 0.375rem 0;
+  padding-left: 1.25rem;
+}
+.chat-md ul { list-style: disc; }
+.chat-md ol { list-style: decimal; }
+.chat-md li {
+  margin: 0.2rem 0;
+}
+.chat-md li::marker {
+  color: #f59e0b99;
+}
+.chat-md table {
+  margin: 0.5rem 0;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+.chat-md th {
+  border-bottom: 1px solid #ffffff26;
+  padding: 0.3rem 0.6rem 0.3rem 0;
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #fbbf24cc; /* amber-400/80 */
+}
+.chat-md td {
+  border-bottom: 1px solid #ffffff12;
+  padding: 0.3rem 0.6rem 0.3rem 0;
+  color: #d4d4d4;
+}
+.chat-md tr:last-child td {
+  border-bottom: none;
+  color: #fafafa;
+  font-weight: 600;
+}
+.chat-md code {
+  border-radius: 4px;
+  background: #ffffff14;
+  padding: 0.1em 0.35em;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.8em;
+  color: #fcd34d;
+}
+.chat-md hr {
+  margin: 0.75rem 0;
+  border: none;
+  border-top: 1px solid #ffffff1a;
+}
+.chat-md blockquote {
+  margin: 0.5rem 0;
+  border-left: 2px solid #f59e0b66;
+  padding-left: 0.75rem;
+  color: #a3a3a3;
+  font-style: italic;
 }
 
 /* Blinking caret on the assistant message that is actively streaming. */
