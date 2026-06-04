@@ -43,9 +43,11 @@ export default function Home() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Glide on new messages, but jump instantly while tokens stream in —
+    // re-triggering a smooth scroll on every token makes the pane rubbery.
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
+      behavior: status === "streaming" ? "auto" : "smooth",
     });
   }, [messages, status]);
 
@@ -148,12 +150,15 @@ export default function Home() {
         </div>
       </header>
 
+      {/* min-w-0 on every column: grid items default to min-width:auto, so a
+          wide chat table would otherwise blow the single-column layout past
+          the viewport on mobile. order-* puts the chat first on small screens. */}
       <main className="mx-auto grid max-w-7xl gap-4 px-4 py-6 lg:grid-cols-[260px_1fr_300px]">
-        <aside className="space-y-4">
+        <aside className="order-2 min-w-0 space-y-4 lg:order-none">
           <ThesisLibrary onPick={submit} />
         </aside>
 
-        <section className="flex flex-col self-start rounded-lg border border-white/10 bg-neutral-900/40 backdrop-blur lg:sticky lg:top-6">
+        <section className="order-1 flex min-w-0 flex-col self-start rounded-lg border border-white/10 bg-neutral-900/40 backdrop-blur lg:order-none lg:sticky lg:top-6">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
             <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-neutral-600">
               Terminal Session
@@ -230,7 +235,7 @@ export default function Home() {
           </div>
         </section>
 
-        <aside className="space-y-4">
+        <aside className="order-3 min-w-0 space-y-4 lg:order-none">
           {latestScorecard ? (
             <Scorecard data={latestScorecard} />
           ) : (

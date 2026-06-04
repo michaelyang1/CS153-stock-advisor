@@ -80,6 +80,10 @@ describe("lib/persona — response format contract (signature formats per questi
     expect(PERSONA_SYSTEM_PROMPT).toContain("exactly ONE format per reply");
     expect(PERSONA_SYSTEM_PROMPT).toContain("~300 words");
   });
+
+  it("bans emojis and decorative symbols (terminal is typographic)", () => {
+    expect(PERSONA_SYSTEM_PROMPT).toContain("NEVER use emojis");
+  });
 });
 
 describe("lib/persona — scope guard (on-topic enforcement)", () => {
