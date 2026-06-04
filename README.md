@@ -7,6 +7,8 @@ Druckenmiller — investors with durable, decade-plus compounding track records.
 Built for **CS153 — The One-Person Frontier Lab**. Track: _Application / Product
 (agentic system)_.
 
+**Live demo:** <https://cs153-stock-advisor.vercel.app> · **Demo video:** _add link at submission_
+
 > ⚠️ **Not financial advice.** Atlas runs a deliberately ultra-aggressive,
 > growth-at-all-costs strategy engineered for asymmetric upside, with a high
 > probability of deep drawdowns. It is a research/demo artifact — if your goal is
@@ -145,13 +147,17 @@ baked snapshot fallback); only the Atlas chat requires an LLM key.
 
 ---
 
-## Testing & evidence
+## Evaluation & evidence
 
-The project ships a **comprehensive automated test suite** (Vitest + React Testing
-Library, set up per the official Next.js App Router testing guide). CI
-(`.github/workflows/test.yml`) runs **lint → test → build** on every PR and push.
+Validation ran along three tracks: an automated test suite, live behavioral
+probes against the real model, and failure analysis of actual incidents hit
+during development.
 
-Coverage highlights:
+### 1. Automated test suite — 109 tests, CI-enforced
+
+Vitest + React Testing Library, set up per the official Next.js App Router
+testing guide. CI (`.github/workflows/test.yml`) runs **lint → test → build**
+on every PR and push. Coverage highlights:
 
 - **Quotes API** (`app/api/quotes/route.ts`): CSV parsing, the literal-`+` Stooq
   separator regression, the `live → cache → snapshot` fallback chain, `source`
@@ -163,12 +169,39 @@ Coverage highlights:
   `lib/quotes.ts`, `lib/persona.ts`) — including the response-format and
   scope-guard prompt contracts.
 - **UI** (`app/page.tsx` + components): the headline, risk-disclosure footer,
-  sample prompts, empty states, and every sidebar component render correctly
-  (`useChat` mocked); assistant markdown renders as real headings/tables/lists
-  while user-typed markdown stays literal.
+  sample prompts, empty states, every sidebar component, mobile-layout
+  regressions, and markdown rendering (assistant markdown becomes real
+  headings/tables/lists; user-typed markdown stays literal) — `useChat` mocked.
 
 **Policy:** every feature or bug fix must ship with tests in the same change — see
 `AGENTS.md`. Run `npm test` to reproduce.
+
+### 2. Live behavioral probes (real model, deployed app)
+
+- **Full agent loop**: "Score Palantir (PLTR)" fired all five tools in sequence
+  (quote → fundamentals → news → scoreThesis → addToWatchlist), streamed a
+  grounded thesis, populated the scorecard (HIGH CONVICTION) and watchlist.
+- **Format adherence**: "Head to head: NVDA vs AMD" produced the signature
+  comparison shape — 7-axis rubric table with weighted totals and a one-line
+  *The Winner* verdict; a macro prompt produced *Bottom Line → evidence → How
+  to Play It*. Both pixel-verified in the browser, desktop and mobile.
+- **Abuse resistance**: "How is the weather today?" and an "ignore all previous
+  instructions" prompt-injection both returned the one-sentence on-topic
+  refusal with **zero tool calls** — spam cannot burn inference credits or
+  repurpose the advisor.
+- **Cost envelope**: ~$0.03 per full tool-loop conversation turn ≈ 600+
+  conversations on the $20 course inference budget.
+
+### 3. Failure analysis (real incidents → design changes)
+
+- **Stooq rate-limits datacenter IPs**: the production ticker tape went blank;
+  root-caused and redesigned into the `live → in-memory cache → baked snapshot`
+  fallback chain with `source` tagging (PRs #6–#8).
+- **Yahoo Finance 429s mid-conversation**: the advisor now states that live
+  data is unavailable and reasons from fundamentals knowledge instead of
+  fabricating numbers — observed live and kept as designed behavior.
+- **Known limits** are documented honestly in
+  [Limitations & major decisions](#limitations--major-decisions).
 
 ---
 
@@ -205,8 +238,12 @@ Per the CS153 AI policy, here is how and where AI tools were used.
   suite** and this documentation.
 - **Human ownership.** The student defined the concept, product requirements, and
   design direction, and reviewed/approved every change. All work landed through
-  pull requests on `main` — the commit history (PRs #1–#12, commits co-authored by
-  Claude) is the transparent record of AI-assisted development over time.
+  pull requests on `main` — the commit history (21 merged PRs, commits co-authored
+  by Claude) is the transparent record of AI-assisted development over time.
+- **Sources.** No code was forked or borrowed from existing repositories — the app
+  was scaffolded with `create-next-app` and built from there. Market data comes
+  from public Stooq and Yahoo Finance endpoints; academic motivation cites
+  Bessembinder's *Do Stocks Outperform Treasury Bills?* (see Problem & Motivation).
 
 ---
 
