@@ -1,17 +1,28 @@
 import { anthropic } from "@ai-sdk/anthropic";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { convertToModelMessages, stepCountIs, streamText, type UIMessage } from "ai";
 import { PERSONA_SYSTEM_PROMPT } from "@/lib/persona";
 import { advisorTools } from "@/lib/tools";
+import { resolveAdvisorModel } from "@/lib/model";
 
 export const maxDuration = 60;
 
-const MODEL_ID = process.env.ADVISOR_MODEL ?? "claude-sonnet-4-5";
+const cfg = resolveAdvisorModel();
+
+const model =
+  cfg.provider === "openrouter"
+    ? createOpenRouter({
+        apiKey: process.env.OPENROUTER_CS153_API_KEY,
+        appName: "Atlas Frontier",
+        appUrl: "https://cs153-stock-advisor.vercel.app",
+      }).chat(cfg.modelId)
+    : anthropic(cfg.modelId);
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
   const result = streamText({
-    model: anthropic(MODEL_ID),
+    model,
     system: PERSONA_SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages),
     tools: advisorTools,

@@ -85,11 +85,11 @@ login — appropriate for a single-session demo (see Limitations).
 
 - **Next.js 16** (App Router) + **TypeScript**, deployed on **Vercel**
 - **Vercel AI SDK v6** (`streamText`, `useChat`) with multi-step tool calling
-- **LLM provider:** currently **Anthropic Claude** direct (`@ai-sdk/anthropic`,
-  `claude-sonnet-4-5` default, override via `ADVISOR_MODEL`). An **OpenRouter**
-  provider swap (to use OpenRouter inference credits, keeping a Claude model for
-  identical tool/persona behavior) is being integrated — the chat route is the
-  only file that changes.
+- **LLM provider:** **OpenRouter** (`@openrouter/ai-sdk-provider`) running
+  **Claude Sonnet 4.6** (`anthropic/claude-sonnet-4.6`) by default — chosen for
+  frontier-grade multi-step tool calling and persona quality at Sonnet pricing.
+  Falls back to direct Anthropic (`@ai-sdk/anthropic`, `claude-sonnet-4-5`) when
+  only `ANTHROPIC_API_KEY` is set; override either default via `ADVISOR_MODEL`.
 - **Stooq** (ticker tapes) + **Yahoo Finance** (chat tools) — public endpoints,
   no key required
 - **Tailwind v4** for the dark terminal UI
@@ -102,7 +102,7 @@ login — appropriate for a single-session demo (see Limitations).
 Requires **Node 22+** and npm.
 
 ```bash
-cp .env.example .env.local      # add your ANTHROPIC_API_KEY
+cp .env.example .env.local      # add your OPENROUTER_CS153_API_KEY
 npm install
 npm run dev                     # http://localhost:3000
 ```
@@ -120,8 +120,9 @@ Environment variables (`.env.example`):
 
 | Var | Required | Purpose |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | yes (until OpenRouter swap lands) | LLM inference for the chat route |
-| `ADVISOR_MODEL` | no | Override the default model id |
+| `OPENROUTER_CS153_API_KEY` | yes (preferred) | LLM inference via OpenRouter — Claude Sonnet 4.6 default |
+| `ANTHROPIC_API_KEY` | fallback only | Direct Anthropic; used when no OpenRouter key is set |
+| `ADVISOR_MODEL` | no | Override the model id for whichever provider is active |
 
 The ticker tapes and historical-analog UI work with **no key at all** (Stooq +
 baked snapshot fallback); only the Atlas chat requires an LLM key.
@@ -193,16 +194,15 @@ Per the CS153 AI policy, here is how and where AI tools were used.
 
 ## Compute
 
-Inference runs on a hosted LLM API (Anthropic now; OpenRouter credits incoming) —
-no local GPU required. Vercel serverless functions host the API routes. Course
-DigitalOcean / Cloudflare compute credits are **optional** and unused: this app
-needs neither a VPS nor self-hosted infra.
+Inference runs on a hosted LLM API via **OpenRouter** (course inference
+credits) — no local GPU required. Vercel serverless functions host the API
+routes. Course DigitalOcean / Cloudflare compute credits are **optional** and
+unused: this app needs neither a VPS nor self-hosted infra.
 
 ---
 
 ## Roadmap
 
-- OpenRouter provider swap (use OpenRouter inference credits)
 - Persist watchlist + chat (localStorage, or a Vercel Marketplace store such as
   Upstash Redis) so sessions survive refresh
 - Pre-IPO / private-company mode (VC scratchpad) via Crunchbase / PitchBook RAG
