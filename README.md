@@ -35,6 +35,18 @@ pressure-test "is this the next 10x?" with structure instead of vibes.
 - **Chat** with Atlas, a frontier-opportunity persona that scores every idea on a
   7-axis rubric (founder, market S-curve, moat, unit economics, narrative
   velocity, asymmetric payoff, timing catalyst).
+- **Signature response formats** — every reply follows a branded, recurring shape
+  for its question type, rendered as rich markdown in the chat:
+  - **VERDICT** (one name): scored header (`TICKER — BAND · x/10`) → The Call →
+    Why → The Analog → Catalyst Watch → Kill Switch
+  - **HEAD-TO-HEAD** (comparisons): rubric-axis table, one column per name,
+    closed by The Winner
+  - **FRONTIER SCAN** (themes): S-curve framing → ranked 3–5 list → Deepest Edge
+  - **MACRO READ**: Bottom Line first → evidence bullets → How to Play It
+  - **QUICK TAKE** (follow-ups): ≤3 sentences, no scaffolding
+- **On-topic scope guard** — off-topic or prompt-injection messages get a
+  one-sentence decline with zero tool calls, so spam can't burn inference
+  credits or repurpose the advisor.
 - **Live market tools** (Yahoo Finance) the model calls mid-conversation:
   real-time quotes, fundamentals, and news search.
 - **Conviction Scorecard** that auto-populates whenever Atlas scores a name —
@@ -55,7 +67,8 @@ app/page.tsx              ← 3-pane terminal (analog library / chat / scorecard
                             + ticker tapes + risk-disclosure footer
 app/api/chat/route.ts     ← streamText + LLM + 5 tools, multi-step loop (stopWhen 6 steps)
 app/api/quotes/route.ts   ← Stooq batch CSV → live quotes, with a fallback chain
-lib/persona.ts            ← system prompt (the "fund manager" persona + rubric)
+lib/persona.ts            ← system prompt (persona + rubric + the five response
+                            formats + on-topic scope guard)
 lib/tools.ts              ← getQuote, getFundamentals, searchNews (Yahoo Finance),
                             scoreThesis (pure rubric math), addToWatchlist (pure)
 lib/frontier-theses.ts    ← curated 10x/100x historical analogs (sidebar)
@@ -90,6 +103,9 @@ login — appropriate for a single-session demo (see Limitations).
   frontier-grade multi-step tool calling and persona quality at Sonnet pricing.
   Falls back to direct Anthropic (`@ai-sdk/anthropic`, `claude-sonnet-4-5`) when
   only `ANTHROPIC_API_KEY` is set; override either default via `ADVISOR_MODEL`.
+- **streamdown** — streaming-tolerant GitHub-flavored markdown rendering for
+  Atlas's replies (headings, tables, ranked lists), so the signature formats
+  display correctly even mid-stream
 - **Stooq** (ticker tapes) + **Yahoo Finance** (chat tools) — public endpoints,
   no key required
 - **Tailwind v4** for the dark terminal UI
@@ -144,10 +160,12 @@ Coverage highlights:
   1.0) and conviction-band thresholds; `addToWatchlist` shape; `getQuote` Yahoo
   parsing.
 - **Data + persona invariants** (`lib/tickerSnapshot.ts`, `lib/frontier-theses.ts`,
-  `lib/quotes.ts`, `lib/persona.ts`).
+  `lib/quotes.ts`, `lib/persona.ts`) — including the response-format and
+  scope-guard prompt contracts.
 - **UI** (`app/page.tsx` + components): the headline, risk-disclosure footer,
   sample prompts, empty states, and every sidebar component render correctly
-  (`useChat` mocked).
+  (`useChat` mocked); assistant markdown renders as real headings/tables/lists
+  while user-typed markdown stays literal.
 
 **Policy:** every feature or bug fix must ship with tests in the same change — see
 `AGENTS.md`. Run `npm test` to reproduce.
