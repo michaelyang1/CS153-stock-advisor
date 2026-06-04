@@ -84,6 +84,17 @@ body {
   letter-spacing: 0.02em;
   color: #fcd34d; /* amber-300 — the verdict header is the signature */
 }
+.chat-md h1,
+.chat-md h2 {
+  /* The verdict header (## TICKER — BAND · x/10) is the brand moment —
+     give it a touch more presence than sub-section headers. */
+  font-size: 1.0625rem;
+}
+.chat-md > hr:first-child {
+  /* The model sometimes opens a post-tool continuation with `---`;
+     a floating rule at the top of a bubble reads as noise. */
+  display: none;
+}
 .chat-md > *:first-child {
   margin-top: 0;
 }
@@ -116,7 +127,7 @@ body {
 }
 .chat-md th {
   border-bottom: 1px solid #ffffff26;
-  padding: 0.3rem 0.6rem 0.3rem 0;
+  padding: 0.5rem 0.75rem;
   text-align: left;
   font-size: 0.68rem;
   font-weight: 600;
@@ -126,7 +137,9 @@ body {
 }
 .chat-md td {
   border-bottom: 1px solid #ffffff12;
-  padding: 0.3rem 0.6rem 0.3rem 0;
+  padding: 0.55rem 0.75rem;
+  vertical-align: top;
+  font-size: 0.8125rem;
   color: #d4d4d4;
 }
 .chat-md tr:last-child td {
