@@ -238,7 +238,7 @@ Per the CS153 AI policy, here is how and where AI tools were used.
   suite** and this documentation.
 - **Human ownership.** The student defined the concept, product requirements, and
   design direction, and reviewed/approved every change. All work landed through
-  pull requests on `main` — the commit history (21 merged PRs, commits co-authored
+  pull requests on `main` — the commit history (24 merged PRs, commits co-authored
   by Claude) is the transparent record of AI-assisted development over time.
 - **Sources.** No code was forked or borrowed from existing repositories — the app
   was scaffolded with `create-next-app` and built from there. Market data comes
