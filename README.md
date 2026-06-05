@@ -7,7 +7,7 @@ Druckenmiller — investors with durable, decade-plus compounding track records.
 Built for **CS153 — The One-Person Frontier Lab**. Track: _Application / Product
 (agentic system)_.
 
-**Live demo:** <https://cs153-stock-advisor.vercel.app> · **Demo video:** _add link at submission_
+**Live demo:** <https://cs153-stock-advisor.vercel.app> · **Demo video:** <https://www.youtube.com/watch?v=XjYmibS4TEA>
 
 > ⚠️ **Not financial advice.** Atlas runs a deliberately ultra-aggressive,
 > growth-at-all-costs strategy engineered for asymmetric upside, with a high
